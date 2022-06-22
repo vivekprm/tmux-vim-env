@@ -1,0 +1,24 @@
+# ./.tmuxinator.yml
+
+name: go
+root: ~/go/src/github.com/vivekprm/vim-go-tutorial
+on_project_start: ln -sf ~/tmux-vim-env/vim/vimrc.go.symlink ~/.vimrc
+windows:
+  - vim-go-1:
+      layout: main-horizontal
+      root: ~/go/src/github.com/vivekprm/vim-go-tutorial
+      panes:
+        - vim
+        -
+  - vim-go-2:
+      layout: main-horizontal
+      root: ~/go/src/github.com/vivekprm/vim-go-tutorial
+      panes:
+        - vim
+        - 
+  - vim-go-3:
+      layout: main-horizontal
+      root: ~/go/src/github.com/vivekprm/vim-go-tutorial
+      panes:
+        - vim
+        -

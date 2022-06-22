@@ -1,0 +1,181 @@
+set -g history-limit 20000
+
+# automatically renumber tmux windows
+set -g renumber-windows on
+
+# unbind default prefix and set it to Ctrl+a
+unbind C-b
+set -g prefix C-a
+bind C-a send-prefix
+
+# for nested tmux sessions
+bind-key a send-prefix
+
+# Activity Monitoring
+setw -g monitor-activity off
+set -g visual-activity off
+
+# Rather than constraining window size to the maximum size of any client
+# connected to the *session*, constrain window size to the maximum size of any
+# client connected to *that window*. Much more reasonable.
+setw -g aggressive-resize on
+
+# make delay shorter
+set -sg escape-time 0
+
+# tile all windows
+unbind =
+bind = select-layout tiled
+
+# cycle through panes
+# unbind C-a
+# unbind o # this is the default key for cycling panes
+# bind ^A select-pane -t:.+
+
+# make window/pane index start with 1
+set -g base-index 1
+setw -g pane-base-index 1
+
+set-option -g focus-events on
+set-option -g set-titles on
+set-option -g set-titles-string "#T - #W"
+set-window-option -g automatic-rename on
+set-option -g automatic-rename-format ""
+
+######################
+#### Key Bindings ####
+######################
+
+# reload config file
+bind r source-file ~/.tmux.conf \; display "Config Reloaded!"
+
+# split window and fix path for tmux 1.9
+bind | split-window -h -c "#{pane_current_path}"
+bind - split-window -v -c "#{pane_current_path}"
+
+# synchronize all panes in a window
+bind y setw synchronize-panes
+
+# pane movement shortcuts
+bind h select-pane -L
+bind j select-pane -D
+bind k select-pane -U
+bind l select-pane -R
+
+bind -r C-h select-window -t :-
+bind -r C-l select-window -t :+
+
+# Resize pane shortcuts
+bind -r H resize-pane -L 10
+bind -r J resize-pane -D 10
+bind -r K resize-pane -U 10
+bind -r L resize-pane -R 10
+
+# enable mouse support for switching panes/windows
+setw -g mouse on
+
+# set vi mode for copy mode
+setw -g mode-keys vi
+# more settings to make copy-mode more vim-like
+unbind [
+bind Escape copy-mode
+unbind p
+bind p paste-buffer
+bind -T copy-mode-vi v send -X begin-selection
+
+if-shell "uname | grep -q Darwin" {
+    bind -T copy-mode-vi y send -X copy-pipe-and-cancel 'tmux save-buffer - | pbcopy'; \
+    bind C-c run 'tmux save-buffer - | pbcopy'; \
+    bind C-v run 'tmux set-buffer "$(pbpaste)"; tmux paste-buffer'
+}
+
+if-shell '[[ $(uname -s) = Linux ]]' {
+    bind -T copy-mode-vi y send -X copy-pipe-and-cancel 'xclip -i -sel clipboard'; \
+    bind C-c run "tmux save-buffer - | xclip -i -sel clipboard"; \
+    bind C-v run 'tmux set-buffer "$(xclip -o -sel clipboard)"; tmux paste-buffer'
+}
+
+# source-file "$DOTFILES/tmux/themes/bubbles.conf"
+
+######################
+###### Plugins #######
+######################
+# Plugin path
+set-environment -g TMUX_PLUGIN_MANAGER_PATH '~/tmux-vim-env/tmux/plugins/'
+
+# List of plugins
+set -g @plugin 'tmux-plugins/tpm'
+set -g @plugin 'tmux-plugins/tmux-sensible'
+set -g @plugin 'tmux-plugins/tmux-cpu'
+set -g @plugin 'egel/tmux-gruvbox'
+set -g @plugin 'tassaron/tmux-df'
+# Other examples:
+# set -g @plugin 'github_username/plugin_name'
+# set -g @plugin 'github_username/plugin_name#branch'
+# set -g @plugin 'git@github.com:user/plugin'
+# set -g @plugin 'git@bitbucket.com:user/plugin'
+
+# Initialize TMUX plugin manager (keep this line at the very bottom of tmux.conf)
+run '~/tmux-vim-env/tmux/plugins/tpm/tpm'
+
+####################################
+###### Plugin Configurations #######
+####################################
+
+set -g @tmux-gruvbox 'dark' # or 'light'
+set -g status-right '#(gitmux "#{pane_current_path}")'
+set -g @df_cmd_private1 "$HOME"
+set -g @df_cmd_private2 "/"
+
+## COLORSCHEME: gruvbox dark (medium)
+set-option -g status "on"
+
+# default statusbar color
+set-option -g status-style bg=colour237,fg=colour223 # bg=bg1, fg=fg1
+
+# default window title colors
+set-window-option -g window-status-style bg=colour214,fg=colour237 # bg=yellow, fg=bg1
+
+# default window with an activity alert
+set-window-option -g window-status-activity-style bg=colour237,fg=colour248 # bg=bg1, fg=fg3
+
+# active window title colors
+set-window-option -g window-status-current-style bg=red,fg=colour237 # fg=bg1
+
+# pane border
+set-option -g pane-active-border-style fg=colour250 #fg2
+set-option -g pane-border-style fg=colour237 #bg1
+
+# message infos
+set-option -g message-style bg=colour239,fg=colour223 # bg=bg2, fg=fg1
+
+# writing commands inactive
+set-option -g message-command-style bg=colour239,fg=colour223 # bg=fg3, fg=bg1
+
+# pane number display
+set-option -g display-panes-active-colour colour250 #fg2
+set-option -g display-panes-colour colour237 #bg1
+
+# clock
+set-window-option -g clock-mode-colour colour109 #blue
+
+# bell
+set-window-option -g window-status-bell-style bg=colour167,fg=colour235 # bg=red, fg=bg
+
+## Theme settings mixed with colors (unfortunately, but there is no cleaner way)
+set-option -g status-justify "left"
+set-option -g status-left-style none
+set-option -g status-left-length "80"
+set-option -g status-right-style none
+set-option -g status-right-length "80"
+set-window-option -g window-status-separator ""
+
+
+set-option -g status-left "#[bg=colour241,fg=colour248] #S #[bg=colour237,fg=colour241,nobold,noitalics,nounderscore]"
+set-option -g status-right "#[bg=colour237,fg=colour239 nobold, nounderscore, noitalics]#[bg=colour239,fg=colour246] %Y-%m-%d  %H:%M #[bg=colour239,fg=colour248,nobold,noitalics,nounderscore]#[bg=colour248,fg=colour237] #h "
+
+set-window-option -g window-status-current-format "#[bg=colour214,fg=colour237,nobold,noitalics,nounderscore]#[bg=colour214,fg=colour239] #I #[bg=colour214,fg=colour239,bold] #W#{?window_zoomed_flag,*Z,} #[bg=colour237,fg=colour214,nobold,noitalics,nounderscore]"
+set-window-option -g window-status-format "#[bg=colour239,fg=colour237,noitalics]#[bg=colour239,fg=colour223] #I #[bg=colour239,fg=colour223] #W #[bg=colour237,fg=colour239,noitalics]"
+
+# set -g status-left '#(gitmux "#{pane_current_path}")'
+# vim: set ft=tmux tw=0 nowrap:

@@ -1,0 +1,8 @@
+vim/bundle
+vim/bundle/*
+vim/swap
+vim/swap/*
+tmux/coc
+tmux/coc/*
+tmux/plugins
+tmux/plugins/*

@@ -1,0 +1,5 @@
+" Some of Vim’s built-in features are implemented with Vim script, which means that they will only work when plugins are enabled. This file contains the absolute minimum configuration that is required to activate Vim’s built-in plugins
+"
+
+set nocompatible
+filetype plugin on

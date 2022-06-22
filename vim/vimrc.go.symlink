@@ -1,0 +1,329 @@
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" => General
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+" load plugins from vundle
+filetype off
+
+set rtp+=~/.vim/plugins/Vundle.vim
+
+" Plugins
+call vundle#begin()
+
+" let vundle manage vundle
+Plugin 'gmarik/vundle'
+
+" list all plugins that you'd like to install here
+Plugin 'kien/ctrlp.vim' " fuzzy find files
+Plugin 'scrooloose/nerdtree' " file drawer, open with :NERDTreeToggle
+Plugin 'benmills/vimux'
+Plugin 'tpope/vim-fugitive' " the ultimate git helper
+Plugin 'tpope/vim-commentary' " comment/uncomment lines with gcc or gc in visual mode
+
+" colorschemes
+" Plugin 'chriskempson/base16-vim'
+Plugin 'morhetz/gruvbox'
+Plugin 'vim-airline/vim-airline'
+
+" go plugins
+Plugin 'fatih/vim-go'
+Plugin 'AndrewRadev/splitjoin.vim'
+" https://github.com/fatih/vim-go/blob/master/gosnippets/UltiSnips/go.snippets
+Plugin 'SirVer/ultisnips'
+
+" Additional
+" Plugin 'tsony-tsonev/nerdtree-git-plugin'
+Plugin 'Xuyuanp/nerdtree-git-plugin'
+Plugin 'tiagofumo/vim-nerdtree-syntax-highlight'
+Plugin 'ryanoasis/vim-devicons'
+Plugin 'airblade/vim-gitgutter'
+Plugin 'christoomey/vim-tmux-navigator'
+
+call vundle#end()
+
+filetype plugin indent on
+
+set directory^=$HOME/tmux-vim-env/vim/swap//
+
+set nocompatible " not compatible with vi
+set autoread " detect when a file is changed
+
+" make backspace behave in a sane manner
+set backspace=indent,eol,start
+
+" set a map leader for more key combos
+let mapleader = ','
+
+" Tab control
+set noexpandtab " tabs ftw
+set smarttab " tab respects 'tabstop', 'shiftwidth', and 'softtabstop'
+set tabstop=4 " the visible width of tabs
+set softtabstop=4 " edit as if the tabs are 4 characters wide
+set shiftwidth=4 " number of spaces to use for indent and unindent
+set shiftround " round indent to a multiple of 'shiftwidth'
+
+set clipboard=unnamed
+
+" faster redrawing
+set ttyfast
+
+" code folding settings
+set foldmethod=syntax " fold based on indent
+set foldnestmax=10 " deepest fold is 10 levels
+set nofoldenable " don't fold by default
+set foldlevel=1
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" => User Interface
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+" Searching
+set ignorecase " case insensitive searching
+set smartcase " case-sensitive if expresson contains a capital letter
+set hlsearch
+set incsearch " set incremental search, like modern browsers
+set nolazyredraw " don't redraw while executing macros
+
+set magic " Set magic on, for regex
+
+set showmatch " show matching braces
+set mat=2 " how many tenths of a second to blink
+
+" switch syntax highlighting on
+syntax on
+
+set encoding=utf8
+let base16colorspace=256  " Access colors present in 256 colorspace"
+set t_Co=256 " Explicitly tell vim that the terminal supports 256 colors"
+set background=dark
+colorscheme gruvbox
+
+set number
+
+set autoindent " automatically set indent of new line
+set smartindent
+
+set laststatus=2 " show the satus line all the time
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" => Mappings
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+map <leader>ev :e! ~/.vimrc<cr> " edit ~/.vimrc
+
+map <leader>wc :wincmd q<cr>
+
+" moving up and down work as you would expect
+nnoremap <silent> j gj
+nnoremap <silent> k gk
+
+" helpers for dealing with other people's code
+nmap \t :set ts=4 sts=4 sw=4 noet<cr>
+nmap \s :set ts=4 sts=4 sw=4 et<cr>
+
+" Search navigations
+" forward
+" :cnoremap <c-n> <CR>n/<c-g>
+" backward
+" :cnoremap <c-N> <CR>n/<c-t>
+" Enter to edit in place
+" Press * to search the word under cursor
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" => Functions
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+map <C-h> :call WinMove('h')<cr>
+map <C-j> :call WinMove('j')<cr>
+map <C-k> :call WinMove('k')<cr>
+map <C-l> :call WinMove('l')<cr>
+
+" Window movement shortcuts
+" move to the window in the direction shown, or create a new window
+function! WinMove(key)
+    let t:curwin = winnr()
+    exec "wincmd ".a:key
+    if (t:curwin == winnr())
+        if (match(a:key,'[jk]'))
+            wincmd v
+        else
+            wincmd s
+        endif
+        exec "wincmd ".a:key
+    endif
+endfunction
+
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+" => Plugin settings
+"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
+
+" close NERDTree after a file is opened
+let g:NERDTreeQuitOnOpen=0
+" show hidden files in NERDTree
+let NERDTreeShowHidden=1
+" Toggle NERDTree
+nmap <silent> <leader>k :NERDTreeToggle<cr>
+" expand to the path of the file in the current buffer
+nmap <silent> <leader>y :NERDTreeFind<cr>
+autocmd VimEnter * NERDTree
+" map fuzzyfinder (CtrlP) plugin
+" nmap <silent> <leader>t :CtrlP<cr>
+nmap <silent> <leader>r :CtrlPBuffer<cr>
+let g:ctrlp_map='<leader>t'
+let g:ctrlp_dotfiles=1
+let g:ctrlp_working_path_mode = 'ra'
+
+" CtrlP ignore patterns
+let g:ctrlp_custom_ignore = {
+            \ 'dir': '\.git$\|node_modules$\|\.hg$\|\.svn$',
+            \ 'file': '\.exe$\|\.so$'
+            \ }
+
+" search the nearest ancestor that contains .git, .hg, .svn
+let g:ctrlp_working_path_mode = 2
+
+"""""""""""""""""
+" vim-go settings
+"""""""""""""""""
+
+" Can run GoBuild without save
+set autowrite
+
+" Mappings
+" Quickfix navigations
+map <C-n> :cnext<CR>
+map <C-m> :cprevious<CR>
+nnoremap <leader>a :cclose<CR>
+
+" GoBuild
+autocmd FileType go nmap <leader>b <Plug>(go-build)
+
+" GoRun
+autocmd FileType go nmap <leader>r <Plug>(go-run)
+
+" All lists (location list etc) will be of type quickfix.
+let g:go_list_type = "quickfix"
+
+" GoTest timeout
+let g:go_test_timeout = '10s'
+
+" GoTest
+autocmd FileType go nmap <leader>t <Plug>(go-test)
+
+" GoCoverage
+autocmd FileType go nmap <Leader>c <Plug>(go-coverage-toggle)
+
+" Autoformat on save
+let g:go_fmt_autosave = 1
+
+" goimports will automatically format and also rewrite your import declarations
+let g:go_fmt_command = "goimports"
+
+" comments part of the function, when execute dif, daf, yif, yaf, vif, vaf
+let g:go_textobj_include_function_doc = 1
+
+" to not allow gofmt fail silently
+let g:go_fmt_fail_silently = 0
+
+" to default to camelCase while formatting
+" let g:go_snippet_case_type = "camelcase"
+
+" Enables highlighting for type
+let g:go_highlight_types = 1
+
+" Enables field highlighting
+let g:go_highlight_fields = 1
+
+" highlights function names
+let g:go_highlight_functions = 1
+let g:go_highlight_methods = 1
+
+" highlight operators
+" let g:go_highlight_operators = 1
+"
+" highlights extra types
+let g:go_highlight_extra_types = 1
+
+" highlights build tags
+let g:go_highlight_build_constraints = 1
+
+" highlight the Go directive //go:generate.
+let g:go_highlight_generate_tags = 1
+
+" tab as 4 spaces
+autocmd BufNewFile,BufRead *.go setlocal noexpandtab tabstop=4 shiftwidth=4
+
+" GoMetaLinter checkers
+let g:go_metalinter_enabled = ['vet', 'golint', 'errcheck']
+
+" Call GoMetaLinter on save
+let g:go_metalinter_autosave = 1
+" GoMetaLinter Checkers for autosave
+let g:go_metalinter_autosave_enabled = ['vet', 'golint']
+" GoMetaLinter timeout
+let g:go_metalinter_deadline = "5s"
+
+" This will add new commands, called :A, :AV, :AS and :AT. Here :A works just like :GoAlternate
+autocmd Filetype go command! -bang A call go#alternate#Switch(<bang>0, 'edit')
+" open a new vertical split with the alternate file
+autocmd Filetype go command! -bang AV call go#alternate#Switch(<bang>0, 'vsplit')
+" open the alternate file in a new split view
+autocmd Filetype go command! -bang AS call go#alternate#Switch(<bang>0, 'split')
+" open the new tab
+autocmd Filetype go command! -bang AT call go#alternate#Switch(<bang>0, 'tabe')
+
+" By default godef uses the tool guru. To change it to godef
+" let g:go_def_mode = 'godef'
+
+" By default :GoDecls and :GoDeclsDir shows type and function declarations. 
+" This is customizable with the g:go_decls_includes setting
+let g:go_decls_includes = "func,type"
+
+" function signature is being printed in the statusline
+autocmd FileType go nmap <Leader>i <Plug>(go-info)
+" automatically show the information whenever you move your cursor
+let g:go_auto_type_info = 1
+" By default info text updates every 800ms.
+set updatetime=100
+
+" :GoSameIds used to see all matching identifiers. To do this automatically
+let g:go_auto_sameids = 1
+
+" If you don't like that vim-go opens a browser tab for you, when you run
+" :GoPlay
+" let g:go_play_open_browser = 0
+
+"""""""""""""""""""""""""""
+"""" Other commands """""""
+"""""""""""""""""""""""""""
+" :GoDef gd or <c-]> used to go to definition. <c-o> to exit to previous
+" location.
+" :GoDefPop you can jump back easily via :GoDefPop to your older locations or
+" use <c-t>
+" :GoDefStack you'll see that a custom window with a list of your old locations
+" :GoDefStackClear clears the older locations stack
+" :GoDecls shows all type and function declarations
+" :GoDeclsDir lists all the declarations from the files in the given directory (but not subdirectories)
+" :GoFiles To see the files that make a package
+" :GoDeps shows the dependencies of a file
+" :GoReferrers calls the referrers mode of vim-go, which finds references to the selected identifier
+" :GoDescribe It's just like :GoInfo, but it's a little bit more advanced (it gives us more information).
+" :GoImplements lists the implemetation of the var under cursor.
+" :GoWhicherrs The whicherrs mode reports the set of possible constants, global variables, and concrete types that may appear in a " value of type error.
+" :GoChannelPeers tracks how values are send between channels.
+" :GoCallees shows the possible call targets of the selected function call.
+" :GoCallers shows the callers of this function.
+" :GoCallstack shows an arbitrary path from the root of the call graph to the
+" function containing the selection.
+" :GoGuruScope to change the scope on the fly, ... select the whole GOPATH. - (negative) sign to exclude a package
+" :GoGuruTags <tagname> is used to provide custom tags.
+" :GoRename to rename the field under the cursor.
+" :GoFreevars select a code block and extract method. 
+" :GoGenerate calls go generate under the hood.
+" :GoImpl implements the interface for the type under the cursor. You can give
+" interfact also :GoImpl io.ReadWriteCloser
+" :GoPlay can be used to copy the code and visit play.golang.org and then
+" paste it.
+
+" [[ Go to previous function
+" ]] Go to next function
+" 2]] Go to next to next function. 
